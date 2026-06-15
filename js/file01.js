@@ -1,6 +1,6 @@
 "use strict";
 
-import { fetchProducts } from "./functions.js";
+import { fetchProducts, fetchCategories } from "./functions.js";
 
 const showToast = () => {
     const toast = document.getElementById("toast-interactive");
@@ -21,11 +21,6 @@ const showVideo = () => {
         });
     }
 };
-
-(() => {
-    showToast();
-    showVideo();
-})();
 
 const renderProducts = () => {
     fetchProducts("https://data-dawm.github.io/datum/reseller/products.json")
@@ -72,8 +67,36 @@ const renderProducts = () => {
         });
 };
 
+const renderCategories = async () => {
+    try{
+        let result = await fetchCategories('https://data-dawm.github.io/datum/reseller/categories.xml')
+        if(result.success){
+            let container = document.getElementById("categories");
+            container.innerHTML = `<option selected disabled>Seleccione una categoría</option>`;
+            let categoriesXML = result.body
+            let categories = categoriesXML.getElementsByTagName("category")
+            
+            for (let category of categories) {
+                let categoryHTML = `<option value="[ID]">[NAME]</option>`;
+                let id = category.getElementsByTagName("id")[0].textContent;
+                let name = category.getElementsByTagName("name")[0].textContent;
+                
+                categoryHTML = categoryHTML.replace("[ID]", id);
+                categoryHTML = categoryHTML.replace("[NAME]", name);
+                container.innerHTML += categoryHTML;
+            }
+        }else {
+            alert(result.body);
+        }
+    }catch(error){
+        alert(error);
+    }
+
+};
+
 (() => {
     showToast();
     showVideo();
     renderProducts();
+    renderCategories();
 })();
